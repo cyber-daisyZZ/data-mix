@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库服务
+  postgres:
+    image: postgres:15-alpine
+    container_name: datamix-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Postgres2024!
+      POSTGRES_DB: datamix
+    ports:
+      - "5432:5432"
+    volumes:
+      # 数据持久化 - 将数据存储到 I 盘
+      - I:/DockerData/postgres/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 缓存服务
+  redis:
+    image: redis:7-alpine
+    container_name: datamix-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      # 数据持久化 - 将数据存储到 I 盘
+      - I:/DockerData/redis/data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 可选：pgAdmin 数据库管理工具
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: datamix-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@datamix.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    volumes:
+      - I:/DockerData/pgadmin/data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+
+  # 可选：RedisInsight Redis 管理工具
+  redisinsight:
+    image: redislabs/redisinsight:latest
+    container_name: datamix-redisinsight
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    volumes:
+      - I:/DockerData/redisinsight/data:/data
+    depends_on:
+      - redis
+

@@ -1,98 +1,307 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 数据爬取后台系统
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+基于 NestJS + Fastify + PostgreSQL + Redis 的动态数据爬取后台系统。
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 功能特性
 
-## Description
+- ✅ **动态项目管理**：支持创建多个爬取项目，每个项目有独立的数据库
+- ✅ **动态表结构**：根据配置自动创建数据库表结构
+- ✅ **版本管理**：支持项目配置变更时的版本控制
+- ✅ **任务队列**：基于 Bull 的异步任务处理
+- ✅ **数据去重**：自动检测并去除重复数据
+- ✅ **灵活查询**：支持动态字段的条件查询
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 技术栈
 
-## Project setup
+- **框架**: NestJS + Fastify
+- **数据库**: PostgreSQL
+- **缓存/队列**: Redis + Bull
+- **ORM**: TypeORM
+
+## 快速开始
+
+### 1. 安装依赖
 
 ```bash
-$ pnpm install
+pnpm install
 ```
 
-## Compile and run the project
+### 2. 配置环境变量
+
+创建 `.env` 文件（参考 `.env.example`）：
+
+```env
+# 数据库配置
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_NAME=crawler_main
+
+# Redis配置
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=
+
+# 服务端口
+PORT=3000
+```
+
+### 3. 启动服务
 
 ```bash
-# development
-$ pnpm run start
+# 开发模式
+pnpm start:dev
 
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+# 生产模式
+pnpm build
+pnpm start:prod
 ```
 
-## Run tests
+## API 文档
+
+### Swagger 文档
+
+系统已集成 Swagger API 文档，启动服务后访问：
+
+**Swagger UI**: `http://localhost:3000/api`
+
+在 Swagger 界面中可以：
+- 查看所有 API 接口文档
+- 查看请求/响应参数说明
+- 直接在浏览器中测试 API
+
+### 1. 项目管理
+
+#### 创建项目
 
 ```bash
-# unit tests
-$ pnpm run test
+POST /projects
+Content-Type: application/json
 
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+{
+  "name": "用户数据爬取",
+  "api_url": "https://api.example.com/users",
+  "method": "GET",
+  "request_params": {
+    "page": 1,
+    "pageSize": 100
+  },
+  "response_structure": [
+    {
+      "key": "user_id",
+      "type": "VARCHAR(255)",
+      "nullable": false,
+      "primary": true
+    },
+    {
+      "key": "username",
+      "type": "VARCHAR(100)",
+      "nullable": false
+    },
+    {
+      "key": "email",
+      "type": "VARCHAR(255)",
+      "nullable": true
+    },
+    {
+      "key": "age",
+      "type": "INTEGER",
+      "nullable": true
+    },
+    {
+      "key": "created_at",
+      "type": "TIMESTAMP",
+      "nullable": false,
+      "default": "NOW()"
+    }
+  ]
+}
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+#### 获取项目列表
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+GET /projects
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+#### 获取项目详情
 
-## Resources
+```bash
+GET /projects/:id
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+#### 更新项目
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+PATCH /projects/:id
+Content-Type: application/json
 
-## Support
+{
+  "name": "更新后的项目名",
+  "response_structure": [...]
+}
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+**注意**：如果更新了 `response_structure`，系统会自动：
+- 版本号 +1
+- 创建新的数据存储数据库（旧的保留）
+- 后续任务将使用新版本
 
-## Stay in touch
+#### 删除项目
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+DELETE /projects/:id
+```
 
-## License
+### 2. 任务管理
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+#### 创建任务（自动加入队列）
+
+```bash
+POST /tasks
+Content-Type: application/json
+
+{
+  "project_id": "项目ID",
+  "request_params": {
+    "page": 1
+  }
+}
+```
+
+#### 获取任务列表
+
+```bash
+GET /tasks?projectId=项目ID  # 可选：按项目筛选
+```
+
+#### 获取任务详情
+
+```bash
+GET /tasks/:id
+```
+
+### 3. 数据查询
+
+#### 查询项目数据
+
+```bash
+POST /query
+Content-Type: application/json
+
+{
+  "projectId": "项目ID",
+  "version": 1,  // 可选，不指定则使用最新版本
+  "filters": [
+    {
+      "field": "username",
+      "operator": "LIKE",
+      "value": "张%"
+    },
+    {
+      "field": "age",
+      "operator": ">=",
+      "value": 18
+    },
+    {
+      "field": "status",
+      "operator": "IN",
+      "values": ["active", "pending"]
+    }
+  ],
+  "orderBy": "created_at",
+  "order": "DESC",
+  "limit": 20,
+  "offset": 0
+}
+```
+
+**支持的查询操作符**：
+- `=` - 等于
+- `!=` - 不等于
+- `>` - 大于
+- `<` - 小于
+- `>=` - 大于等于
+- `<=` - 小于等于
+- `LIKE` - 模糊匹配
+- `IN` - 在数组中
+
+#### 获取项目所有版本
+
+```bash
+GET /query/versions/:projectId
+```
+
+## 数据库设计
+
+### 主数据库 (`crawler_main`)
+
+- **projects**: 项目表
+- **tasks**: 任务表
+
+### 项目配置数据库 (`project_{projectId}_config`)
+
+- **project_config**: 项目配置表（存储版本等信息）
+
+### 项目数据数据库 (`project_{projectId}_data_v{version}`)
+
+- **crawl_data**: 数据表（结构动态生成）
+  - `id`: UUID（主键）
+  - `project_id`: UUID（关联项目）
+  - `version`: INTEGER（版本号）
+  - ...（动态字段）
+
+## 版本管理机制
+
+1. 创建项目时，自动创建版本 1 的数据数据库
+2. 更新项目配置时：
+   - 如果 `response_structure` 发生变化，版本自动 +1
+   - 创建新的数据存储数据库（旧版本保留）
+   - 更新项目配置数据库中的版本号
+3. 创建任务时，自动使用项目当前版本
+4. 数据查询可以指定版本，或使用最新版本
+
+## 字段类型支持
+
+支持以下 PostgreSQL 类型：
+
+- `VARCHAR(n)`
+- `TEXT`
+- `INTEGER`
+- `BIGINT`
+- `DECIMAL(p,s)`
+- `NUMERIC(p,s)`
+- `BOOLEAN`
+- `DATE`
+- `TIMESTAMP`
+- `TIMESTAMPTZ`
+- `JSON`
+- `JSONB`
+- `UUID`
+
+## 注意事项
+
+1. **数据库权限**：确保 PostgreSQL 用户有创建数据库的权限
+2. **Redis 连接**：确保 Redis 服务正常运行
+3. **去重机制**：
+   - 如果配置了主键字段，基于主键去重
+   - 否则使用全字段哈希去重
+4. **批量插入**：系统自动使用批量插入（每批100条）提高性能
+
+## 开发
+
+```bash
+# 运行测试
+pnpm test
+
+# 代码格式化
+pnpm format
+
+# 代码检查
+pnpm lint
+```
+
+## 许可证
+
+UNLICENSED
