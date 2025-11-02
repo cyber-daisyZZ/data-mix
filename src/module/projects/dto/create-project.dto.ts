@@ -49,6 +49,11 @@ class RequestParamDto {
   @ApiPropertyOptional({ description: '字段长度限制（用于 text 类型）', example: 255 })
   @IsOptional()
   length?: number;
+
+  @ApiPropertyOptional({ description: '是否保存到数据库 如果需要保存到数据库 这个字段也会同步到后端数据库', default: false })
+  @IsOptional()
+  @IsBoolean()
+  saveToDatabase?: boolean = false;
 }
 
 /**

@@ -18,7 +18,7 @@ export class ProjectsService {
     private projectRepository: Repository<Project>,
     private databaseManager: DatabaseManagerService,
     private dataSource: DataSource,
-  ) {}
+  ) { }
 
   async create(createProjectDto: CreateProjectDto): Promise<Project> {
     // 验证字段定义
@@ -46,10 +46,21 @@ export class ProjectsService {
         type: getDbType(field.type as FieldType, field.length),
       }),
     );
+
+    // 检查请求参数中 是否有需要保存到数据库的字段
+    const requestParamsDbFieldDefinitions = createProjectDto.request_params.filter(param => param.saveToDatabase).map(param => ({
+      key: param.key,
+      type: param.type,
+      nullable: param.required,
+      default: param.default,
+      unique: false,
+      length: param.length,
+    }));
+
     await this.databaseManager.createProjectDataTable(
       savedProject.id,
       1,
-      dbFieldDefinitions,
+      [...dbFieldDefinitions, ...requestParamsDbFieldDefinitions],
     );
 
     return savedProject;
@@ -76,7 +87,7 @@ export class ProjectsService {
     const structureChanged =
       updateProjectDto.response_structure &&
       JSON.stringify(updateProjectDto.response_structure) !==
-        JSON.stringify(project.response_structure);
+      JSON.stringify(project.response_structure);
 
     if (structureChanged && updateProjectDto.response_structure) {
       // 验证新的字段定义
@@ -177,7 +188,7 @@ export class ProjectsService {
           `字段 ${field.key} 的类型 ${field.type} 不被支持。支持的类型: ${validTypes.join(', ')}`,
         );
       }
-      
+
       // 对于 select、checkbox、radio 类型，如果提供了 options，验证 options 不为空
       if (
         (field.type === FieldType.SELECT ||

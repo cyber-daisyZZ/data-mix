@@ -22,6 +22,7 @@ export class Project {
     required?: boolean;
     options?: string[]; // 用于 select、checkbox、radio
     length?: number; // 用于 text 类型
+    saveToDatabase?: boolean; // 是否保存到数据库
   }>;
 
   @Column({ type: 'jsonb' })
