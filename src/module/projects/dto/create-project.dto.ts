@@ -166,5 +166,13 @@ export class CreateProjectDto {
   @ValidateNested({ each: true })
   @Type(() => FieldDefinitionDto)
   response_structure: FieldDefinitionDto[];
+
+  @ApiProperty({
+    description: '数据层级 比如目标数据在接口返回对象的data.list中 则填写 ["data", "list"]',
+    example: ['data', 'list'],
+  })
+  @IsArray()
+  @IsString({ each: true })
+  target_chain: string[];
 }
 

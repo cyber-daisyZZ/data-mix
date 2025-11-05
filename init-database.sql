@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS projects (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
     api_url TEXT NOT NULL,
+    target_chain JSONB NOT NULL DEFAULT '[]'::jsonb,
     method VARCHAR(10) NOT NULL CHECK (method IN ('GET', 'POST', 'PUT', 'DELETE')),
     request_params JSONB NOT NULL DEFAULT '[]'::jsonb,
     response_structure JSONB NOT NULL DEFAULT '[]'::jsonb,

@@ -36,6 +36,9 @@ export class Project {
     length?: number; // 用于 text 类型
   }>;
 
+  @Column({ type: 'jsonb', default: [] })
+  target_chain: Array<string>;
+
   @Column({ type: 'integer', default: 1 })
   version: number;
 
